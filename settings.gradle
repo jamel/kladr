@@ -1,0 +1,7 @@
+include "kladr-core"
+include "kladr-search"
+include "kladr-api"
+include "kladr-client"
+include "kladr-service"
+
+rootProject.name = "kladr"

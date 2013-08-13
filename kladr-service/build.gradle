@@ -1,0 +1,14 @@
+dependencies {
+    compile project(":kladr-api")
+    compile project(":kladr-search")
+    compile libs.dropwizard_core
+    compile libs.dropwizard_assets
+    compile libs.j7zip
+}
+
+modifyPom { pom ->
+    pom.project {
+        name "Kladr service module"
+        description "Kladr Http RESTful service."
+    }
+}

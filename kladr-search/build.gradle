@@ -1,0 +1,14 @@
+dependencies {
+    compile project(":kladr-api")
+    compile project(":kladr-core")
+    compile libs.commons_io
+    compile libs.lucene_core
+    compile libs.lucene_analyzers_common
+}
+
+modifyPom { pom ->
+    pom.project {
+        name "Kladr search module"
+        description "Full text search through Kladr."
+    }
+}

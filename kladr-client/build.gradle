@@ -1,0 +1,10 @@
+dependencies {
+    compile project(":kladr-api")
+}
+
+modifyPom { pom ->
+    pom.project {
+        name "Kladr client module"
+        description "Http client for Kladr service."
+    }
+}

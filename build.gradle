@@ -1,25 +1,33 @@
-group = "org.jamel.kladr"
-version = "0.0.1"
-description = "Set of Kladr utils"
+allprojects {
+    apply plugin: "idea"
+
+    group = "org.jamel.kladr"
+    version = "0.0.1"
+    description = "Set of Kladr utils"
+}
+
+subprojects {
+    apply plugin: "java"
+    apply from: "${rootDir}/gradle/oss.gradle"
+    apply from: "${rootDir}/gradle/pom.gradle"
+    apply from: "${rootDir}/gradle/libs.gradle"
+
+    compileJava.options.encoding = "UTF-8"
+
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+        mavenCentral()
+    }
+
+    dependencies {
+        compile     libs.slf4j_api
+        testCompile libs.junit
+    }
+}
 
 defaultTasks "clean", "build"
-
-apply plugin: "idea"
-apply plugin: "java"
-apply from: "./gradle/oss.gradle"
-apply from: "./gradle/pom.gradle"
-
-
-compileJava.options.encoding = "UTF-8"
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compile     "org.slf4j:slf4j-api:1.7.5"
-    testCompile "junit:junit:4.7"
-}
 
 task wrapper(type: Wrapper) {
     gradleVersion = "1.6"

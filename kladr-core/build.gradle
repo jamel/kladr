@@ -1,0 +1,11 @@
+dependencies {
+    compile libs.dbf_reader
+    compile libs.trove4j
+}
+
+modifyPom { pom ->
+    pom.project {
+        name "Kladr core module"
+        description "Contains classes which describes Kladr entities."
+    }
+}

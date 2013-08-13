@@ -1,0 +1,27 @@
+ext {
+
+    dropwizardVersion = "0.7.0-SNAPSHOT"
+    luceneVersion = "4.4.0"
+
+    libs = [
+            // dropwizard
+            dropwizard_core:            "com.codahale.dropwizard:dropwizard-core:${dropwizardVersion}",
+            dropwizard_assets:          "com.codahale.dropwizard:dropwizard-assets:${dropwizardVersion}",
+
+            // lucene
+            lucene_core:                "org.apache.lucene:lucene-core:${luceneVersion}",
+            lucene_analyzers_common:    "org.apache.lucene:lucene-analyzers-common:${luceneVersion}",
+
+            // logging
+            slf4j_api:                  "org.slf4j:slf4j-api:1.7.5",
+
+            // testing
+            junit:                      "junit:junit:4.7",
+
+            // misc
+            trove4j:                    "net.sf.trove4j:trove4j:3.0.3",
+            commons_io:                 "org.apache.commons:commons-io:1.3.2",
+            dbf_reader:                 "org.jamel.dbf:dbf-reader:0.0.3",
+            j7zip:                      "org.jamel.j7zip:j7zip:0.0.1",
+    ]
+}

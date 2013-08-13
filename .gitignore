@@ -1,6 +1,18 @@
+# Binary Files #
 *.class
-
-# Package Files #
 *.jar
 *.war
 *.ear
+
+# Gradle temporary dir #
+.gradle/
+
+# Build dirs #
+indexes/
+out/
+build/
+
+# Idea Projects #
+*.iml
+*.ipr
+*.iws

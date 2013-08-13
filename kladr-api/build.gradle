@@ -1,0 +1,6 @@
+modifyPom { pom ->
+    pom.project {
+        name "Kladr API module"
+        description "Kladr representation classes."
+    }
+}
