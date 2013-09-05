@@ -2,7 +2,7 @@ allprojects {
     apply plugin: "idea"
 
     group = "org.jamel.kladr"
-    version = "0.0.1"
+    version = "0.0.2"
     description = "Set of Kladr utils"
 }
 
