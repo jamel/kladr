@@ -8,7 +8,9 @@ import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TLongObjectProcedure;
 import org.jamel.dbf.processor.DbfRowProcessor;
 import org.jamel.dbf.utils.DbfUtils;
+import org.jamel.kladr.cache.KladrCache;
 import org.jamel.kladr.data.City;
+import org.jamel.kladr.data.Country;
 import org.jamel.kladr.data.District;
 import org.jamel.kladr.data.KladrObject;
 import org.jamel.kladr.data.Region;
@@ -46,9 +48,9 @@ public class KladrIndexer {
 
             start = System.currentTimeMillis();
             indexRegions(addressIndexWriter);
-            indexMajorCities(addressIndexWriter);
-            indexDistricts(addressIndexWriter);
             indexCities(addressIndexWriter);
+            indexDistricts(addressIndexWriter);
+            indexCountries(addressIndexWriter);
             indexStreets(addressIndexWriter);
             indexBuildings(addressIndexWriter);
             logger.debug("Indexing kladr tooks " + (System.currentTimeMillis() - start) + " ms");
@@ -69,11 +71,23 @@ public class KladrIndexer {
         });
     }
 
-    private void indexMajorCities(final AddressIndexWriter addressIndexWriter) {
+    private void indexCities(final AddressIndexWriter addressIndexWriter) {
+        // index major cities
         kladrCache.forEachCity(new TLongObjectProcedure<City>() {
             public boolean execute(long kladrCode, City city) {
                 if (city.getRegionCode() == 0) return true; // skip Moscow, Piter and Baykonur
-                if (city.getDistrictCode() == 0 && city.getParentCityCode() == 0) {
+                if (city.getDistrictCode() == 0) {
+                    addressIndexWriter.write(city.getIndex(), addressBuilder.buildFor(city));
+                }
+                return true;
+            }
+        });
+
+        // index not major cities
+        kladrCache.forEachCity(new TLongObjectProcedure<City>() {
+            public boolean execute(long kladrCode, City city) {
+                if (city.getRegionCode() == 0) return true; // skip Moscow, Piter and Baykonur
+                if (city.getDistrictCode() != 0) {
                     addressIndexWriter.write(city.getIndex(), addressBuilder.buildFor(city));
                 }
                 return true;
@@ -90,13 +104,10 @@ public class KladrIndexer {
         });
     }
 
-    private void indexCities(final AddressIndexWriter addressIndexWriter) {
-        kladrCache.forEachCity(new TLongObjectProcedure<City>() {
-            public boolean execute(long kladrCode, City city) {
-                if (city.getRegionCode() == 0) return true; // skip Moscow, Piter and Baykonur
-                if (city.getDistrictCode() != 0 || city.getParentCityCode() != 0) {
-                    addressIndexWriter.write(city.getIndex(), addressBuilder.buildFor(city));
-                }
+    private void indexCountries(final AddressIndexWriter addressIndexWriter) {
+        kladrCache.forEachCountry(new TLongObjectProcedure<Country>() {
+            public boolean execute(long kladrCode, Country country) {
+                addressIndexWriter.write(country.getIndex(), addressBuilder.buildFor(country));
                 return true;
             }
         });

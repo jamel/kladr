@@ -1,6 +1,8 @@
 package org.jamel.kladr;
 
+import org.jamel.kladr.cache.KladrCache;
 import org.jamel.kladr.data.City;
+import org.jamel.kladr.data.Country;
 import org.jamel.kladr.data.District;
 import org.jamel.kladr.data.KladrObject;
 import org.jamel.kladr.data.Region;
@@ -42,26 +44,30 @@ public class AddressBuilder {
         return doBuildForCity(city, 0);
     }
 
+    public String buildFor(Country country) {
+        return doBuildForCountry(country, 0);
+    }
+
     public String buildFor(Street street) {
         int i = 0;
         address[i++] = street;
 
-        City city = kladrCache.getCity(street.getCityCode());
-        if (city == null) {
-            logger.debug("Can't get city by code=" + street.getCityCode());
-            return "";
+        Country country = kladrCache.getCountry(street.getCityCode());
+        if (country != null) {
+            return doBuildForCountry(country, i);
         }
 
-        return doBuildForCity(city, i);
+        City city = kladrCache.getCity(street.getCityCode());
+        if (city != null) {
+            return doBuildForCity(city, i);
+        }
+
+        logger.debug("Can't get city by code=" + street.getCityCode());
+        return "";
     }
 
     private String doBuildForCity(City city, int i) {
         address[i++] = city;
-
-        if (city.getParentCityCode() != 0) {
-            city = kladrCache.getCity(city.getParentCityCode());
-            address[i++] = city;
-        }
 
         if (city.getDistrictCode() != 0) {
             District district = kladrCache.getDistrict(city.getDistrictCode());
@@ -69,6 +75,25 @@ public class AddressBuilder {
         }
 
         Region region = kladrCache.getRegion(city.getRegionCode());
+        if (region != null) address[i++] = region;
+
+        return toAddressString(address, i);
+    }
+
+    private String doBuildForCountry(Country country, int i) {
+        address[i++] = country;
+
+        if (country.getParentCityCode() != 0) {
+            City city = kladrCache.getCity(country.getParentCityCode());
+            address[i++] = city;
+        }
+
+        if (country.getDistrictCode() != 0) {
+            District district = kladrCache.getDistrict(country.getDistrictCode());
+            if (district != null) address[i++] = district;
+        }
+
+        Region region = kladrCache.getRegion(country.getRegionCode());
         if (region != null) address[i++] = region;
 
         return toAddressString(address, i);

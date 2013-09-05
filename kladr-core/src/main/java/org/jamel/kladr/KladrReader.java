@@ -4,11 +4,15 @@ import java.io.File;
 
 import org.jamel.dbf.processor.DbfProcessor;
 import org.jamel.dbf.processor.DbfRowProcessor;
+import org.jamel.kladr.cache.KladrCache;
 import org.jamel.kladr.data.City;
+import org.jamel.kladr.data.Country;
 import org.jamel.kladr.data.District;
+import org.jamel.kladr.data.KladrObject;
 import org.jamel.kladr.data.Region;
 import org.jamel.kladr.data.Street;
-import org.jamel.kladr.processors.KladrRowProcessor;
+import org.jamel.kladr.processors.KladrObjectsProcessor;
+import org.jamel.kladr.processors.StreetProcessor;
 import org.jamel.kladr.utils.Check;
 import org.jamel.kladr.utils.KladrCodeUtils;
 import org.slf4j.Logger;
@@ -34,44 +38,33 @@ public class KladrReader {
      * @param kladrCache   stored in memory cache
      */
     public void readKladrTableTo(final KladrCache kladrCache) {
-        doRead(KladrTable.KLADR, new KladrRowProcessor() {
+        doRead(KladrTable.KLADR, new KladrObjectsProcessor() {
 
             @Override
-            public void readRow(byte[] code, byte regionId, int districtId, int cityId, int countryId,
-                    byte[] name, byte[] socr, int index)
-            {
-                if (districtId == 0 && cityId == 0 && countryId == 0) {
-                    // (1) region
-                    if (KladrCodeUtils.isCityRegion(regionId)) {
-                        long cityCode = regionId * 1_000_000;
-                        City city = new City(name, socr, index, (byte) 0, 0, 0);
-                        Check.isNull(kladrCache.putCity(cityCode, city), "cities collision");
-                    }
-
-                    Region region = new Region(name, socr, index);
-                    Check.isNull(kladrCache.putRegion(regionId, region), "regions collision");
-
-                } else if (cityId == 0 && countryId == 0) {
-                    // (2) district
-                    int districtCode = KladrCodeUtils.getDistrictCode(code);
-                    District district = new District(name, socr, index, regionId);
-                    Check.isNull(kladrCache.putDistrict(districtCode, district), "districts collision");
-
-                } else if (countryId == 0) {
-                    // (3) city
-                    int districtCode = districtId != 0 ? KladrCodeUtils.getDistrictCode(code) : 0;
-                    long cityCode = KladrCodeUtils.getCityCode(code);
-                    City city = new City(name, socr, index, regionId, districtCode, 0);
-                    Check.isNull(kladrCache.putCity(cityCode, city), "countries collision");
-
-                } else {
-                    // (4) country
-                    int districtCode = districtId != 0 ? KladrCodeUtils.getDistrictCode(code) : 0;
-                    long parentCityCode = cityId != 0 ? KladrCodeUtils.getCityCode(code) : 0;
-                    long countryCode = KladrCodeUtils.getCountryCode(code);
-                    City city = new City(name, socr, index, regionId, districtCode, parentCityCode);
-                    Check.isNull(kladrCache.putCity(countryCode, city), "countries collision");
+            public void processRegion(byte regionCode, Region region) {
+                if (KladrCodeUtils.isCityRegion(regionCode)) {
+                    long cityCode = regionCode * 1_000_000;
+                    byte[] name = region.getName().getBytes(KladrObject.CHARSET);
+                    byte[] socr = region.getSocr().getBytes(KladrObject.CHARSET);
+                    City city = new City(name, socr, region.getIndex(), (byte) 0, 0);
+                    Check.isNull(kladrCache.putCity(cityCode, city), "cities collision");
                 }
+                Check.isNull(kladrCache.putRegion(regionCode, region), "regions collision");
+            }
+
+            @Override
+            public void processDistrict(int districtCode, District district) {
+                Check.isNull(kladrCache.putDistrict(districtCode, district), "districts collision");
+            }
+
+            @Override
+            public void processCity(long cityCode, City city) {
+                Check.isNull(kladrCache.putCity(cityCode, city), "countries collision");
+            }
+
+            @Override
+            public void processCountry(long countryCode, Country country) {
+                Check.isNull(kladrCache.putCountry(countryCode, country), "countries collision");
             }
         });
     }
@@ -82,45 +75,14 @@ public class KladrReader {
      * @param kladrCache   stored in memory cache
      */
     public void readStreetTableTo(final KladrCache kladrCache) {
-        doRead(KladrTable.STREET, new KladrRowProcessor() {
+        doRead(KladrTable.STREET, new StreetProcessor() {
+            @Override
+            public void processCity(long cityCode, City city) {
+                Check.isNull(kladrCache.putCity(cityCode, city), "promoted street collision");
+            }
 
             @Override
-            public void readRow(byte[] code, byte regionId, int districtId, int cityId, int countryId,
-                    byte[] name, byte[] socr, int index)
-            {
-                long streetCode = KladrCodeUtils.getStreetCode(code);
-
-                final long cityCode;
-                if (districtId == 0 && cityId == 0 && countryId == 0) {
-                    // (1) in region city
-                    if (KladrCodeUtils.isCityRegion(regionId)) {
-                        cityCode = regionId * 1_000_000;
-                    } else {
-                        // street in region
-                        // HACK: promote street to city with streetCode
-                        City city = new City(name, socr, index, regionId, regionId * 1000, 0);
-                        Check.isNull(kladrCache.putCity(streetCode, city), "promoted street collision");
-                        return;
-                    }
-
-                } else if (cityId == 0 && countryId == 0) {
-                    // street in district
-                    // HACK: promote street to city with streetCode
-                    int districtCode = KladrCodeUtils.getDistrictCode(code);
-                    City city = new City(name, socr, index, regionId, districtCode, 0);
-                    Check.isNull(kladrCache.putCity(streetCode, city), "promoted street collision");
-                    return;
-
-                } else if (countryId == 0) {
-                    // (2) in city
-                    cityCode = KladrCodeUtils.getCityCode(code);
-
-                } else {
-                    // (3) in country
-                    cityCode = KladrCodeUtils.getCountryCode(code);
-                }
-
-                Street street = new Street(name, socr, index, cityCode);
+            public void processStreet(long streetCode, Street street) {
                 Check.isNull(kladrCache.putStreet(streetCode, street), "streets collision");
             }
         });
@@ -149,5 +111,13 @@ public class KladrReader {
         DbfProcessor.processDbf(file, rowProcessor);
 
         logger.debug("Reading {} took {} ms", file, System.currentTimeMillis() - start);
+    }
+
+    public void readKladrTable(KladrObjectsProcessor kladrObjectsProcessor) {
+        doRead(KladrTable.KLADR, kladrObjectsProcessor);
+    }
+
+    public void readStreetTable(StreetProcessor streetProcessor) {
+        doRead(KladrTable.STREET, streetProcessor);
     }
 }

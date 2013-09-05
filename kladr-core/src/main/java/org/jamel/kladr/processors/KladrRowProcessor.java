@@ -25,10 +25,10 @@ public abstract class KladrRowProcessor implements DbfRowProcessor {
         byte[] socr = DbfUtils.trimLeftSpaces((byte[]) row[1]);
         int index = DbfUtils.parseInt((byte[]) row[3]);
 
-        readRow(code, regionId, districtId, cityId, countryId, name, socr, index);
+        processKladrRow(code, regionId, districtId, cityId, countryId, name, socr, index);
     }
 
-    public abstract void readRow(
+    public abstract void processKladrRow(
             byte[] code,
             byte regionId, int districtId, int cityId, int countryId,
             byte[] name, byte[] socr, int index);

@@ -1,4 +1,4 @@
-package org.jamel.kladr;
+package org.jamel.kladr.cache;
 
 import gnu.trove.map.TByteObjectMap;
 import gnu.trove.map.TIntObjectMap;
@@ -10,6 +10,7 @@ import gnu.trove.procedure.TByteObjectProcedure;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TLongObjectProcedure;
 import org.jamel.kladr.data.City;
+import org.jamel.kladr.data.Country;
 import org.jamel.kladr.data.District;
 import org.jamel.kladr.data.Region;
 import org.jamel.kladr.data.Street;
@@ -26,6 +27,7 @@ public class KladrCache {
     private final TByteObjectMap<Region> regions = new TByteObjectHashMap<>();
     private final TIntObjectMap<District> districts = new TIntObjectHashMap<>();
     private final TLongObjectMap<City> cities = new TLongObjectHashMap<>();
+    private final TLongObjectMap<Country> countries = new TLongObjectHashMap<>();
     private final TLongObjectMap<Street> streets = new TLongObjectHashMap<>();
 
 
@@ -63,6 +65,18 @@ public class KladrCache {
 
     public boolean forEachCity(TLongObjectProcedure<City> procedure) {
         return cities.forEachEntry(procedure);
+    }
+
+    public Country putCountry(long countryCode, Country country) {
+        return countries.put(countryCode, country);
+    }
+
+    public Country getCountry(long countryCode) {
+        return countries.get(countryCode);
+    }
+
+    public boolean forEachCountry(TLongObjectProcedure<Country> procedure) {
+        return countries.forEachEntry(procedure);
     }
 
     public Street putStreet(long streetCode, Street street) {
