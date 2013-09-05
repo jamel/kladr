@@ -21,10 +21,6 @@ public class KladrReader {
 
     private static final Logger logger = LoggerFactory.getLogger(KladrReader.class);
 
-    private static final String KLADR_TABLE = "KLADR.DBF";
-    private static final String STREET_TABLE = "STREET.DBF";
-    private static final String DOMA_TABLE = "DOMA.DBF";
-
     private final File kladrDir;
 
 
@@ -38,7 +34,7 @@ public class KladrReader {
      * @param kladrCache   stored in memory cache
      */
     public void readKladrTableTo(final KladrCache kladrCache) {
-        doRead(KLADR_TABLE, new KladrRowProcessor() {
+        doRead(KladrTable.KLADR, new KladrRowProcessor() {
 
             @Override
             public void readRow(byte[] code, byte regionId, int districtId, int cityId, int countryId,
@@ -86,7 +82,7 @@ public class KladrReader {
      * @param kladrCache   stored in memory cache
      */
     public void readStreetTableTo(final KladrCache kladrCache) {
-        doRead(STREET_TABLE, new KladrRowProcessor() {
+        doRead(KladrTable.STREET, new KladrRowProcessor() {
 
             @Override
             public void readRow(byte[] code, byte regionId, int districtId, int cityId, int countryId,
@@ -136,17 +132,17 @@ public class KladrReader {
      * @param rowProcessor each row processor
      */
     public void readDomaTable(DbfRowProcessor rowProcessor) {
-        doRead(DOMA_TABLE, rowProcessor);
+        doRead(KladrTable.DOMA, rowProcessor);
     }
 
     /**
      * Performs reading
      *
-     * @param fileName      name of the file to read
+     * @param table         kladr table
      * @param rowProcessor  each row processor
      */
-    private void doRead(String fileName, DbfRowProcessor rowProcessor) {
-        File file = new File(kladrDir, fileName);
+    private void doRead(KladrTable table, DbfRowProcessor rowProcessor) {
+        File file = new File(kladrDir, table.getFileName());
         logger.info("Start reading {} ...", file);
 
         long start = System.currentTimeMillis();
