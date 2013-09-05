@@ -4,11 +4,11 @@ import java.io.File;
 
 import org.jamel.dbf.processor.DbfProcessor;
 import org.jamel.dbf.processor.DbfRowProcessor;
-import org.jamel.dbf.utils.DbfUtils;
 import org.jamel.kladr.data.City;
 import org.jamel.kladr.data.District;
 import org.jamel.kladr.data.Region;
 import org.jamel.kladr.data.Street;
+import org.jamel.kladr.processors.KladrRowProcessor;
 import org.jamel.kladr.utils.Check;
 import org.jamel.kladr.utils.KladrCodeUtils;
 import org.slf4j.Logger;
@@ -93,7 +93,7 @@ public class KladrReader {
                 final long cityCode;
                 if (districtId == 0 && cityId == 0 && countryId == 0) {
                     // (1) in region city
-                    if (regionId == 77 || regionId == 78 || regionId == 99) {
+                    if (KladrCodeUtils.isCityRegion(regionId)) {
                         cityCode = regionId * 1_000_000;
                     } else {
                         // street in region
@@ -150,35 +150,4 @@ public class KladrReader {
 
         logger.debug("Reading {} took {} ms", file, System.currentTimeMillis() - start);
     }
-
-
-    /**
-     * Process each data row from kladr tables with splitting
-     * CODE by meaningful parts and string data trimming.
-     */
-    private static abstract class KladrRowProcessor implements DbfRowProcessor {
-
-        @Override
-        public final void processRow(Object[] row) {
-            byte[] code = (byte[]) row[2];
-
-            // skip invalid values
-            if (!KladrCodeUtils.isValid(code)) return;
-
-            byte regionId = KladrCodeUtils.getRegionId(code);
-            int districtId = KladrCodeUtils.getDistrictId(code);
-            int cityId = KladrCodeUtils.getCityId(code);
-            int countryId = KladrCodeUtils.getCountryId(code);
-
-            byte[] name = DbfUtils.trimLeftSpaces((byte[]) row[0]);
-            byte[] socr = DbfUtils.trimLeftSpaces((byte[]) row[1]);
-            int index = DbfUtils.parseInt((byte[]) row[3]);
-
-            readRow(code, regionId, districtId, cityId, countryId, name, socr, index);
-        }
-
-        public abstract void readRow(byte[] code, byte regionId, int districtId, int cityId, int countryId,
-                byte[] name, byte[] socr, int index);
-    }
-
 }
