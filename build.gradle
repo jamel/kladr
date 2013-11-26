@@ -30,5 +30,5 @@ subprojects {
 defaultTasks "clean", "build"
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "1.6"
+    gradleVersion = "1.9"
 }
