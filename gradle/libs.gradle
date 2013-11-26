@@ -5,8 +5,8 @@ ext {
 
     libs = [
             // dropwizard
-            dropwizard_core:            "com.codahale.dropwizard:dropwizard-core:${dropwizardVersion}",
-            dropwizard_assets:          "com.codahale.dropwizard:dropwizard-assets:${dropwizardVersion}",
+            dropwizard_core:            "io.dropwizard:dropwizard-core:${dropwizardVersion}",
+            dropwizard_assets:          "io.dropwizard:dropwizard-assets:${dropwizardVersion}",
 
             // lucene
             lucene_core:                "org.apache.lucene:lucene-core:${luceneVersion}",

@@ -2,8 +2,8 @@ package org.jamel.kladr;
 
 import javax.validation.constraints.NotNull;
 
-import com.codahale.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
 
 /**
  * @author Sergey Polovko

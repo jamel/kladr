@@ -3,9 +3,9 @@ package org.jamel.kladr.commands;
 import java.io.File;
 import java.io.IOException;
 
-import com.codahale.dropwizard.cli.ConfiguredCommand;
-import com.codahale.dropwizard.setup.Bootstrap;
 import com.google.common.base.Stopwatch;
+import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.apache.commons.io.FileUtils;
 import org.jamel.j7zip.ArchiveExtractCallback;

@@ -3,12 +3,12 @@ package org.jamel.kladr;
 import java.io.File;
 import java.util.TimeZone;
 
-import com.codahale.dropwizard.Application;
-import com.codahale.dropwizard.assets.AssetsBundle;
-import com.codahale.dropwizard.setup.Bootstrap;
-import com.codahale.dropwizard.setup.Environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import org.jamel.kladr.commands.ImportCommand;
 import org.jamel.kladr.health.IndexHealthCheck;
 import org.jamel.kladr.resources.search.SearchResource;
