@@ -1,3 +1,13 @@
+apply plugin: "pkg4j"
+apply plugin: "application"
+
+
+// The main class of the application
+mainClassName = 'org.jamel.kladr.KladrApplication'
+run {
+    args 'server', 'src/main/pkg/etc/kladr.yaml'
+}
+
 dependencies {
     compile project(":kladr-api")
     compile project(":kladr-search")
@@ -12,3 +22,32 @@ modifyPom { pom ->
         description "Kladr Http RESTful service."
     }
 }
+
+// OS specific package description
+pkg {
+    author = "Sergey Polovko <sergey@polovko.me>"
+    section = "kladr"
+    name = "kladr-service"
+    description = "Kladr service."
+    changes = "src/main/pkg/changes.txt"
+
+    dirs {
+        pack dir: "src/main/pkg/etc", prefix: "/etc", mode: "744"
+        pack dir: "src/main/pkg/bin", prefix: "/var/lib/kladr/bin", mode: "755"
+        pack dir: "build/libs",  prefix: "/var/lib/kladr/libs"
+        create "/var/log/kladr", owner: "deployer"
+        create "/var/cache/kladr", owner: "deployer"
+    }
+
+    postinst { exec "update-rc.d kladr defaults 90 20" }
+    prerm    { exec "update-rc.d -f kladr remove" }
+}
+
+// copy all runtime dependencies to build/libs folder
+task prepareRuntime(type: Copy, dependsOn: "build") {
+    from configurations.runtime
+    into "$buildDir/libs"
+}
+
+// "deb" is shortcut name of buildDeb which invokes prepareRuntime before run
+task deb(type: org.jamel.pkg4j.gradle.tasks.BuildDebTask, dependsOn: prepareRuntime)

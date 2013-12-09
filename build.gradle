@@ -1,8 +1,13 @@
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath "org.jamel.pkg4j:pkg4j-gradle:0.0.5" }
+}
+
 allprojects {
     apply plugin: "idea"
 
     group = "org.jamel.kladr"
-    version = "0.0.2"
+    version = "0.0.3"
     description = "Set of Kladr utils"
 }
 

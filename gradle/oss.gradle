@@ -2,21 +2,9 @@ apply plugin: "signing"
 apply plugin: "maven"
 
 
-def isReleaseBuild = false
-def isSnapshotBuild = false
-def isDevBuild = false
-
-if (hasProperty("release")) {
-    isReleaseBuild = true
-} else if (hasProperty("snapshot")) {
-    isSnapshotBuild = true
-} else {
-    isDevBuild = true
-}
-
-if (!isReleaseBuild) {
-    version = version + "-SNAPSHOT"
-}
+def isReleaseBuild = hasProperty("release")
+def isSnapshotBuild = hasProperty("snapshot")
+def isDevBuild = (!isReleaseBuild && !isSnapshotBuild)
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = "javadoc"
@@ -41,9 +29,14 @@ if (isReleaseBuild) {
 }
 
 uploadArchives {
+
     repositories.mavenDeployer {
         configuration = configurations.archives
         uniqueVersion = false
+
+        if (!isReleaseBuild) {
+            pom.version = project.version + "-SNAPSHOT"
+        }
 
         if (isDevBuild) {
             repository(url: "file://${System.getProperty('user.home')}/.m2/repository/")
@@ -53,7 +46,7 @@ uploadArchives {
             }
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+                authentication(userName: sonatypeUsername, password: sonatypeUsername)
             }
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
                 authentication(userName: sonatypeUsername, password: sonatypePassword)

@@ -1,0 +1,2 @@
+release date=11:20 11.27.2013,version=0.0.3
+ * initial release of deb package with kladr service
