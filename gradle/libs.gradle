@@ -1,6 +1,6 @@
 ext {
 
-    dropwizardVersion = "0.7.0-SNAPSHOT"
+    dropwizardVersion = "0.7.0"
     luceneVersion = "4.4.0"
 
     libs = [
